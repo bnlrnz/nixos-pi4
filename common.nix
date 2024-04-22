@@ -16,7 +16,7 @@ in
   nixpkgs.buildPlatform.system = "x86_64-linux";
   # ! Need a trusted user for deploy-rs.
   nix.settings.trusted-users = ["@wheel"];
-  system.stateVersion = "24.05";
+  system.stateVersion = "23.11";
 
   # don't build the NixOS docs locally
   documentation.nixos.enable = false;
@@ -65,53 +65,43 @@ in
     swraid.enable = lib.mkForce false;
   };
 
-  sound.enable = true;
-
-  hardware.pulseaudio.enable = true;
-
-  # systemd.services.btattach = {
-  #   before = [ "bluetooth.service" ];
-  #   after = [ "dev-ttyAMA0.device" ];
-  #   wantedBy = [ "multi-user.target" ];
-  #   serviceConfig = {
-  #     ExecStart = ''
-  #       ${pkgs.bluez}/bin/btattach -B /dev/ttyAMA0 -P bcm -S 3000000
-  #     '';
-  #   };
-  # };
-
   networking = {
-    useDHCP = true;
-    wireless = {
-      enable = true;
-      interfaces = ["wlan0"];
-      # ! Change the following to connect to your own network
-      networks = {
-        "ytvid-rpi" = { # SSID
-          psk = "ytvid-rpi"; # password
-        };
-      };
+    hostName = "nixpi";
+    useDHCP = false;
+    interfaces = {
+      eth0.ipv4.addresses = [
+        {
+          address = "10.10.10.74";
+          prefixLength = 24;
+        }
+      ];
     };
+    defaultGateway = {
+      interface = "eth0";
+      address = "10.10.10.1";
+    };
+    nameservers = ["1.1.1.1" "8.8.8.8"];
+#    networkmanager.enable = true;
   };
 
   services.dnsmasq.enable = true;
 
-    # Enable OpenSSH out of the box.
+  # Enable OpenSSH out of the box.
   services.sshd.enable = true;
 
   # NTP time sync.
   services.timesyncd.enable = true;
 
   # ! Change the following configuration
-  users.users.chrism = {
+  users.users.pi = {
     isNormalUser = true;
-    home = "/home/chrism";
-    description = "Chris McDonough";
+    home = "/home/pi";
+    description = "Lord Pi McPison";
     extraGroups = ["wheel" "networkmanager" "gpio" "audio"];
     # ! Be sure to put your own public key here
     openssh = {
       authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOLXUsGqUIEMfcXoIiiItmGNqOucJjx5D6ZEE3KgLKYV ednesia"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHayUPsznsg3sdyPbcVrPOtbjX+Fgw6Jga6PAjRDvkuc bnlrnz@gmail.com"
       ];
     };
   };
@@ -122,31 +112,28 @@ in
   };
 
   # ! Be sure to change the autologinUser.
-  services.getty.autologinUser = "chrism";
+  services.getty.autologinUser = "pi";
 
   environment.systemPackages = with pkgs; [
     libraspberrypi
     raspberrypi-eeprom
     htop
     vim
-    emacs
+    #neovim
     ripgrep
     btop
-    python_with_packages
     usbutils
     tmux
     git
     lsof
     bat
-    alsa-utils # aplay
+    eza
     dig
     tree
     bintools
     file
     ethtool
+    nettools
     minicom
-    bluez
   ];
-
-
 }

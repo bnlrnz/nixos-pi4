@@ -41,7 +41,4 @@
       enable = true;
     };
   };
-
-  networking.hostName = "nixos-pi4";
-
 }
