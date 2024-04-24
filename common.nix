@@ -81,10 +81,23 @@ in
       address = "10.10.10.1";
     };
     nameservers = ["1.1.1.1" "8.8.8.8"];
-#    networkmanager.enable = true;
+    firewall = {
+        enable = true;
+        allowedUDPPorts = [ 
+          53 # DNS/adguard 
+          51820 # VPN/wireguard
+        ];
+    };
   };
 
-  services.dnsmasq.enable = true;
+  # adguard home setup
+  services.adguardhome = {
+    enable = true;
+    openFirewall = true;
+    allowDHCP = true;
+  };
+
+  # services.dnsmasq.enable = true;
 
   # Enable OpenSSH out of the box.
   services.sshd.enable = true;
@@ -106,6 +119,10 @@ in
     };
   };
 
+  # make fish default shell
+  programs.fish.enable = true;
+  users.defaultUserShell = pkgs.fish;
+
   security.sudo = {
     enable = true;
     wheelNeedsPassword = false;
@@ -114,17 +131,21 @@ in
   # ! Be sure to change the autologinUser.
   services.getty.autologinUser = "pi";
 
+  # enable adguard home
+
+
   environment.systemPackages = with pkgs; [
     libraspberrypi
     raspberrypi-eeprom
     htop
     vim
-    #neovim
+    neovim
     ripgrep
     btop
     usbutils
     tmux
     git
+    fish
     lsof
     bat
     eza

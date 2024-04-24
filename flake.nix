@@ -26,14 +26,6 @@
       };
     in rec {
       nixosConfigurations = {
-        zero2w = nixpkgs.lib.nixosSystem {
-          inherit specialArgs;
-          modules = [
-            ({ config, pkgs, ... }: { nixpkgs.overlays = overlays; })
-            "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
-            ./zero2w.nix
-          ];
-        };
         pi4 = nixpkgs.lib.nixosSystem {
           inherit specialArgs;
           modules = [
@@ -47,16 +39,8 @@
       deploy = {
         user = "root";
         nodes = {
-          zero2w = {
-            hostname = "nix-zero2w";
-            profiles.system.path =
-              deploy-rs.lib.aarch64-linux.activate.nixos self.nixosConfigurations.zero2w;
-            #deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.zero2w;
-            #remoteBuild = true;
-            
-          };
           pi4 = {
-            hostname = "nix-pi4";
+            hostname = "nixpi";
             profiles.system.path =
               deploy-rs.lib.aarch64-linux.activate.nixos self.nixosConfigurations.pi4;
             #deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.zero2w;
