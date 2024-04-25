@@ -63,6 +63,9 @@ in
     # This will cause the `mdmon` service to crash.
     # See: https://github.com/NixOS/nixpkgs/issues/254807
     swraid.enable = lib.mkForce false;
+
+    # allow forwarding for VPN
+    kernel.sysctl."net.ipv4.ip_forward" = 1;
   };
 
   networking = {
@@ -82,7 +85,7 @@ in
     };
     nameservers = ["1.1.1.1" "8.8.8.8"];
     firewall = {
-        enable = true;
+        enable = false;
         allowedUDPPorts = [ 
           53 # DNS/adguard 
           51820 # VPN/wireguard
@@ -91,11 +94,26 @@ in
           22 # SSH 
         ];
     };
+
+    nat = {
+      enable = true;
+      externalInterface = "eth0";
+      internalInterfaces = [ "wg0" ];
+    };
+
     wg-quick.interfaces = {
       wg0 = {
         address = [ "10.200.200.2/32" ];
         dns = [ "1.1.1.1" "8.8.8.8" ];
         privateKeyFile = "/home/pi/wireguard-keys/private";
+        postUp = ''
+          ${pkgs.iptables}/bin/iptables -A FORWARD -i %i -j ACCEPT
+          ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -o %i -j MASQUERADE
+        '';
+        postDown = ''
+          ${pkgs.iptables}/bin/iptables -D FORWARD -i %i -j ACCEPT
+          ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -o %i -j MASQUERADE
+        '';
         peers = [
           {
             publicKey = "LJYzV6S1nTkaTBNfikjCmVGcQShKGHJkrmiJUoVQdxM=";
