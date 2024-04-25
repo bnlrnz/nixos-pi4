@@ -93,23 +93,19 @@ in
     };
     wg-quick.interfaces = {
       wg0 = {
-        address = [ "10.200.200.2/24" ];
+        address = [ "10.200.200.2/32" ];
         dns = [ "1.1.1.1" "8.8.8.8" ];
         privateKeyFile = "/home/pi/wireguard-keys/private";
         peers = [
           {
             publicKey = "LJYzV6S1nTkaTBNfikjCmVGcQShKGHJkrmiJUoVQdxM=";
-            allowedIPs = [ "10.200.200.0/24" "10.10.10.0/24" ];
+            allowedIPs = [ "0.0.0.0/0" ];#[ "10.200.200.0/24" "10.10.10.0/24" ];
             endpoint = "85.93.16.181:51820";
             persistentKeepalive = 25;
           }
         ];
       };
     };
-  };
-
-  systemd.services = {
-      wg-quick-wg0.wantedBy = lib.mkForce [ ];
   };
 
   # adguard home setup
