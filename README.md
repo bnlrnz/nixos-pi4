@@ -1,6 +1,6 @@
 # Building a NixOS SD image for a Raspberry Pi 4
 
-0. Host setup in `configuration.nix`
+0. Host setup in `configuration.nix` (if your host has another architecture (e.g. x86_64) than the raspberry pi) 
 
 ```nix
   boot.binfmt.emulatedSystems = ["aarch64-linux"];
