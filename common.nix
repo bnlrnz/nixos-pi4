@@ -87,7 +87,29 @@ in
           53 # DNS/adguard 
           51820 # VPN/wireguard
         ];
+        allowedTCPPorts = [ 
+          22 # SSH 
+        ];
     };
+    wg-quick.interfaces = {
+      wg0 = {
+        address = [ "10.200.200.2/24" ];
+        dns = [ "1.1.1.1" "8.8.8.8" ];
+        privateKeyFile = "/home/pi/wireguard-keys/private";
+        peers = [
+          {
+            publicKey = "LJYzV6S1nTkaTBNfikjCmVGcQShKGHJkrmiJUoVQdxM=";
+            allowedIPs = [ "10.200.200.0/24" "10.10.10.0/24" ];
+            endpoint = "85.93.16.181:51820";
+            persistentKeepalive = 25;
+          }
+        ];
+      };
+    };
+  };
+
+  systemd.services = {
+      wg-quick-wg0.wantedBy = lib.mkForce [ ];
   };
 
   # adguard home setup
@@ -96,8 +118,6 @@ in
     openFirewall = true;
     allowDHCP = true;
   };
-
-  # services.dnsmasq.enable = true;
 
   # Enable OpenSSH out of the box.
   services.sshd.enable = true;
@@ -146,6 +166,7 @@ in
     tmux
     git
     fish
+    wireguard-tools
     lsof
     bat
     eza
