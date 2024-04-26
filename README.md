@@ -1,4 +1,5 @@
-# Building a NixOS SD image for a Raspberry Pi 4
+# Building a NixOS SD Card/USB image for a Raspberry Pi 4
+# + remote deployment
 
 0. Host setup in `configuration.nix` (if your host has another architecture (e.g. x86_64) than the raspberry pi) 
 
