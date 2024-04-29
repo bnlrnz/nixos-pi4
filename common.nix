@@ -91,37 +91,47 @@ in
           51820 # VPN/wireguard
         ];
         allowedTCPPorts = [ 
+          53 # DNS/adguard 
           22 # SSH 
         ];
     };
 
     nat = {
       enable = true;
+      enableIPv6 = true;
       externalInterface = "eth0";
       internalInterfaces = [ "wg0" ];
     };
 
     wg-quick.interfaces = {
       wg0 = {
-        address = [ "10.200.200.2/32" ];
+        address = [ "10.200.200.2/24" ];
         dns = [ "1.1.1.1" "8.8.8.8" ];
         privateKeyFile = "/home/pi/wireguard-keys/private";
-        postUp = ''
-          ${pkgs.iptables}/bin/iptables -A FORWARD -i %i -j ACCEPT
-          ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -o %i -j MASQUERADE
-        '';
-        postDown = ''
-          ${pkgs.iptables}/bin/iptables -D FORWARD -i %i -j ACCEPT
-          ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -o %i -j MASQUERADE
-        '';
         peers = [
+          # yoda
           {
             publicKey = "LJYzV6S1nTkaTBNfikjCmVGcQShKGHJkrmiJUoVQdxM=";
-            allowedIPs = [ "0.0.0.0/0" ];#[ "10.200.200.0/24" "10.10.10.0/24" ];
-            endpoint = "85.93.16.181:51820";
+            allowedIPs = [ "0.0.0.0/0" ];
+            endpoint = "bnlrnz.de:51820";
             persistentKeepalive = 25;
           }
         ];
+      };
+    };
+  };
+
+  services.nginx = {
+    enable = true;
+    virtualHosts."bensnas" = {
+      listen = [
+        {
+          addr = "10.200.200.2";
+          port = 5000;
+        }
+      ];
+      locations."/" = {
+        proxyPass = "http://10.10.10.34";
       };
     };
   };
@@ -164,9 +174,6 @@ in
 
   # ! Be sure to change the autologinUser.
   services.getty.autologinUser = "pi";
-
-  # enable adguard home
-
 
   environment.systemPackages = with pkgs; [
     libraspberrypi
